@@ -1,11 +1,16 @@
 function createElement(type, props, ...children) {
-  return {
+  const reactElement = {
     type,
     props: {
       ...props,
-      children,
     },
   };
+
+  if(children.length > 0) {
+    reactElement.props.children = children;
+  }
+
+  return reactElement;
 }
 export default {
   createElement,
