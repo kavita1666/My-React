@@ -1,54 +1,69 @@
 export function render(reactElement, rootElement) {
-  // we need to create DOM element here
+  // 🟢 Clear previous content in the root element before rendering new elements
+  rootElement.innerHTML = "";
 
   function createDOMElement(reactElement) {
-    // if reactElement is function
-    if (typeof reactElement.type === "function") {
-      console.log("----here", reactElement.props);
-      return createDOMElement(reactElement.type(reactElement.props));
-    }
+    // 🟢 Handle null or undefined elements by returning an empty text node
+    if (!reactElement) return document.createTextNode("");
 
-    // if reactElement is array then we need to create DOM element for each element in array
+    // 🟢 If reactElement is an array, process each element separately using recursion
     if (Array.isArray(reactElement)) {
-      // console.log('----here')
-      return reactElement.map((el) => createDOMElement(el)); //recursion
+      return reactElement.map(createDOMElement);
     }
 
-    // let's check if reactElement is string or not
+    // 🟢 If reactElement is a string, create and return a text node
     if (typeof reactElement === "string") {
       return document.createTextNode(reactElement);
     }
 
-    // else destructure reactElement to get type and props
-    const { type, props } = reactElement;
-    const DOMElement = document.createElement(type); // create DOM element with type as string
+    // 🟢 If reactElement is a functional component, call the function with props
+    // and process the returned element recursively
+    if (typeof reactElement?.type === "function") {
+      return createDOMElement(reactElement.type(reactElement.props));
+    }
 
-    // handle props attributes like class, id, name, title...
+    // 🟢 Destructure type and props, ensuring reactElement is valid
+    const { type, props = {} } = reactElement || {};
+    if (!type) return document.createTextNode("");
+
+    // 🟢 Create a DOM element using the type (e.g., 'div', 'span', etc.)
+    const DOMElement = document.createElement(type);
+
+    // 🟢 Set attributes/properties on the DOM element (except children)
     Object.entries(props).forEach(([key, value]) => {
-      DOMElement[key] = value;
-    });
-
-    props.children.forEach((child) => {
-      if (Array.isArray(child)) {
-        DOMElement.appendChild(...child.map((el) => createDOMElement(el)))
-      } else if (typeof child === "string") {
-        const textNote = document.createTextNode(child);
-        DOMElement.appendChild(textNote);
-      } else {
-        DOMElement.appendChild(createDOMElement(child)); // if react element, then call createDOMElement again (recursion)
+      if (key !== "children") {
+        DOMElement[key] = value;
       }
     });
 
-    return DOMElement;
+    // 🟢 Ensure props.children is always treated as an array
+    const children = Array.isArray(props.children) ? props.children : [props.children];
+
+    // 🟢 Recursively create and append children to the DOM element
+    children.forEach((child) => {
+      const childElement = createDOMElement(child);
+      if (Array.isArray(childElement)) {
+        // If the child is an array (e.g., multiple elements), append each element
+        childElement.forEach((nestedChild) => DOMElement.appendChild(nestedChild));
+      } else {
+        DOMElement.appendChild(childElement);
+      }
+    });
+
+    return DOMElement; // 🟢 Return the created DOM element
   }
 
+  // 🟢 Convert the React element tree into a real DOM element
   const DOMElement = createDOMElement(reactElement);
+
+  // 🟢 Append the created DOM elements to the root container
   if (Array.isArray(DOMElement)) {
-    rootElement.appendChild(...DOMElement);
+    DOMElement.forEach((el) => rootElement.appendChild(el));
   } else {
     rootElement.appendChild(DOMElement);
   }
 }
+
 export default {
   render,
 };
