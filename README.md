@@ -21,6 +21,17 @@ The custom React-DOM tree can handle react elements of the following types:
     - props as children elements
     - nested children elements
 
+## Testing
+
+The product listing component has been tested using this custom React library to ensure it properly renders and manages elements dynamically.
+Component structure is as follows:
+- Products component (Parent component that renders a list of Card components and structures the UI with a heading and a scrollable card container)
+    - Card component (Represents an individual product card displaying its image, title, brand, and price)
+
+The product listing component was tested using our custom React library to ensure that:
+- The Products component correctly renders multiple Card components.
+- Props are passed correctly to child components.
+- The custom render function handles arrays of elements efficiently.
 
 ## Usage
 
